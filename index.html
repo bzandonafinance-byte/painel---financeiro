@@ -285,7 +285,7 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="last-update">Última atualização:<br><strong id="update-time">31/05/2024 08:30</strong></div>
+      <div class="last-update">Última atualização:<br><strong id="update-time">—</strong></div>
       <button class="btn-export" onclick="exportExcel()">📥 Exportar Excel</button>
       <button class="btn-export" style="background:#E74C3C" onclick="document.getElementById('upload-input').click()">📂 Importar Dados</button>
       <input type="file" id="upload-input" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
@@ -2709,6 +2709,11 @@ function showToast(msg) {
 // INIT
 // ══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  const updateTimeEl = document.getElementById('update-time');
+  if(updateTimeEl) {
+    const agora = new Date();
+    updateTimeEl.textContent = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }
   let savedLogo = '';
   try { savedLogo = localStorage.getItem('fpa_logo') || ''; } catch (err) {}
   applyLogo(LOGO_BASE64 || savedLogo);
