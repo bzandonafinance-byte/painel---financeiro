@@ -219,6 +219,12 @@
     <div class="nav-item" data-page="balanco" onclick="navigate(this,'balanco')">
       <span class="icon">🏦</span> Balanço Patrimonial
     </div>
+    <div class="nav-item" data-page="orcamentoareas" onclick="navigate(this,'orcamentoareas')">
+      <span class="icon">🏫</span> Orçamento por Área
+    </div>
+    <div class="nav-item" data-page="rentsalas" onclick="navigate(this,'rentsalas')">
+      <span class="icon">🎓</span> Rentabilidade por Sala
+    </div>
     <div class="nav-item" data-page="detalhe" onclick="navigate(this,'detalhe')">
       <span class="icon">🔍</span> Detalhamento
     </div>
@@ -455,6 +461,21 @@
       </div>
 
       <div class="card" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="card-title">⏳ PAGAMENTOS PENDENTES <span id="pendentes-contador"></span></div>
+            <div class="card-sub">Todas as saídas ainda não aprovadas/rejeitadas, de todos os dias</div>
+          </div>
+          <button class="btn-export" style="background:#95A5A6" onclick="mostrarSoPendentes = !mostrarSoPendentes; renderPagamentosPendentes();" id="btn-toggle-pendentes">
+            Ver só pendentes
+          </button>
+        </div>
+        <div style="overflow-x:auto;margin-top:12px;max-height:320px;overflow-y:auto">
+          <table class="data-table" id="tbl-pendentes"></table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
           <div>
             <div class="card-title">LANÇAMENTOS DO DIA — <span id="lancamentos-dia-titulo">—</span></div>
@@ -560,6 +581,66 @@
         <div class="chart-wrap" style="height:180px"><canvas id="chart-rent"></canvas></div>
       </div>
 
+    </div>
+
+    <!-- ══════ PAGE: ORÇAMENTO POR ÁREA ══════ -->
+    <div class="page" id="page-orcamentoareas">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px">Área</label>
+          <select id="filtro-area-orcamento" onchange="mudarAreaOrcamento(this.value)"
+            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;min-width:220px">
+            <option value="Pedagógico">Pedagógico</option>
+            <option value="Administrativo">Administrativo</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Marketing/Comercial">Marketing/Comercial</option>
+            <option value="RH">RH</option>
+          </select>
+        </div>
+        <button class="btn-export" style="background:#E74C3C" onclick="document.getElementById('upload-input-orcamento').click()"
+          title="Selecione as planilhas Orcamento_*.xlsx e/ou Rentabilidade_Salas.xlsx (pode marcar várias de uma vez)">
+          📂 Importar Planilhas (selecione várias)
+        </button>
+        <input type="file" id="upload-input-orcamento" accept=".xlsx,.xls" multiple style="display:none" onchange="importOrcamentoAreas(event)">
+      </div>
+
+      <div class="kpi-row" id="orcamento-kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px"></div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">BUDGET VS REAL POR ITEM — <span id="orcamento-area-titulo">Pedagógico</span></div>
+        <div class="card-sub">R$, acumulado no ano (YTD)</div>
+        <div class="chart-wrap" style="height:280px"><canvas id="chart-orcamento-categorias"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">EVOLUÇÃO MENSAL — BUDGET VS REAL</div>
+        <div class="card-sub">Soma de todos os itens da área selecionada</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="chart-orcamento-mensal"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ══════ PAGE: RENTABILIDADE POR SALA ══════ -->
+    <div class="page" id="page-rentsalas">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn-export" style="background:#E74C3C" onclick="document.getElementById('upload-input-orcamento').click()">
+          📂 Importar Planilhas (selecione várias)
+        </button>
+      </div>
+
+      <div class="kpi-row" id="rentsalas-kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px"></div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">MARGEM (%) POR TURMA/SALA</div>
+        <div class="card-sub">Ordenado da mais rentável para a menos rentável</div>
+        <div class="chart-wrap" style="height:300px"><canvas id="chart-rentsalas"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">DETALHAMENTO POR TURMA</div>
+        <div style="overflow-x:auto;margin-top:12px">
+          <table class="data-table" id="tbl-rentsalas"></table>
+        </div>
+      </div>
     </div>
 
     <!-- ══════ PAGE: DETALHAMENTO ══════ -->
@@ -698,327 +779,12 @@ let DATA = {
     entradas: [],
     saidas:   [],
   },
-  lancamentos_por_dia: {
-  "2026-08-05": [
-    {
-      "id": "2026-08-05_0",
-      "fornecedor": "Sabesp Arbues, 36",
-      "status": "Saida",
-      "conta": "Conta de consumo",
-      "unidade": "PG",
-      "valor": 81.24
-    },
-    {
-      "id": "2026-08-05_1",
-      "fornecedor": "KFK Tintas",
-      "status": "Saida",
-      "conta": "Obra VP",
-      "unidade": "VP",
-      "valor": 299.97
-    },
-    {
-      "id": "2026-08-05_2",
-      "fornecedor": "QI solution (acordo)",
-      "status": "Saida",
-      "conta": "Despesa Adm",
-      "unidade": "VP",
-      "valor": 1737.66
-    },
-    {
-      "id": "2026-08-05_3",
-      "fornecedor": "QI solution (acordo)",
-      "status": "Saida",
-      "conta": "Despesa Adm",
-      "unidade": "PG",
-      "valor": 434.46
-    },
-    {
-      "id": "2026-08-05_4",
-      "fornecedor": "Imax Clean",
-      "status": "Saida",
-      "conta": "Higiene",
-      "unidade": "VP",
-      "valor": 3991
-    },
-    {
-      "id": "2026-08-05_5",
-      "fornecedor": "Ideal Desentupidora",
-      "status": "Saida",
-      "conta": "Manutenção",
-      "unidade": "VP",
-      "valor": 2000
-    },
-    {
-      "id": "2026-08-05_6",
-      "fornecedor": "Reembolso José Roberto",
-      "status": "Saida",
-      "conta": "Manutenção",
-      "unidade": "VP",
-      "valor": 1226.82
-    },
-    {
-      "id": "2026-08-05_7",
-      "fornecedor": "Reembolso José Roberto",
-      "status": "Saida",
-      "conta": "Manutenção",
-      "unidade": "VP",
-      "valor": 2781.96
-    },
-    {
-      "id": "2026-08-05_8",
-      "fornecedor": "Reembolso José Roberto",
-      "status": "Saida",
-      "conta": "Manutenção",
-      "unidade": "VP",
-      "valor": 343.76
-    },
-    {
-      "id": "2026-08-05_9",
-      "fornecedor": "Sun Axix",
-      "status": "Saida",
-      "conta": "Manutenção de ar-condicionado",
-      "unidade": "VP",
-      "valor": 5185
-    },
-    {
-      "id": "2026-08-05_10",
-      "fornecedor": "Sun Axix",
-      "status": "Saida",
-      "conta": "Manutenção de ar-condicionado",
-      "unidade": "PG",
-      "valor": 680
-    },
-    {
-      "id": "2026-08-05_11",
-      "fornecedor": "Reembolso Luciana",
-      "status": "Saida",
-      "conta": "Compra de Lousa",
-      "unidade": "VP",
-      "valor": 4598.44
-    },
-    {
-      "id": "2026-08-05_12",
-      "fornecedor": "VR - LAC",
-      "status": "Saida",
-      "conta": "Vale refeição",
-      "unidade": "VP",
-      "valor": 4530.5
-    },
-    {
-      "id": "2026-08-05_13",
-      "fornecedor": "AMIL - LAC",
-      "status": "Saida",
-      "conta": "Assistencia Médica",
-      "unidade": "VP",
-      "valor": 2161.74
-    },
-    {
-      "id": "2026-08-05_14",
-      "fornecedor": "VR - PRC",
-      "status": "Saida",
-      "conta": "Vale refeição",
-      "unidade": "VP",
-      "valor": 7414.17
-    },
-    {
-      "id": "2026-08-05_15",
-      "fornecedor": "AMIL - PRC",
-      "status": "Saida",
-      "conta": "Assistencia Médica",
-      "unidade": "VP",
-      "valor": 5341.78
-    },
-    {
-      "id": "2026-08-05_16",
-      "fornecedor": "Fabiana Regina 3/3",
-      "status": "Saida",
-      "conta": "Verbas Rescisórias",
-      "unidade": "VP",
-      "valor": 3856.77
-    },
-    {
-      "id": "2026-08-05_17",
-      "fornecedor": "Geovana Ribeiro 3/4",
-      "status": "Saida",
-      "conta": "Verbas Rescisórias",
-      "unidade": "VP",
-      "valor": 4421.08
-    },
-    {
-      "id": "2026-08-05_18",
-      "fornecedor": "VR - KMR",
-      "status": "Saida",
-      "conta": "Vale refeição",
-      "unidade": "VP",
-      "valor": 7175
-    },
-    {
-      "id": "2026-08-05_19",
-      "fornecedor": "AMIL - KMR",
-      "status": "Saida",
-      "conta": "Assistencia Médica",
-      "unidade": "VP",
-      "valor": 2759.86
-    },
-    {
-      "id": "2026-08-05_20",
-      "fornecedor": "Camila Silva 2/3",
-      "status": "Saida",
-      "conta": "Verbas Rescisórias",
-      "unidade": "VP",
-      "valor": 12153
-    },
-    {
-      "id": "2026-08-05_21",
-      "fornecedor": "VR - PHR",
-      "status": "Saida",
-      "conta": "Vale refeição",
-      "unidade": "VP",
-      "valor": 5965.5
-    },
-    {
-      "id": "2026-08-05_22",
-      "fornecedor": "AMIL - PHR",
-      "status": "Saida",
-      "conta": "Assistencia Médica",
-      "unidade": "VP",
-      "valor": 1551.28
-    },
-    {
-      "id": "2026-08-05_23",
-      "fornecedor": "VR - TRF",
-      "status": "Saida",
-      "conta": "Vale refeição",
-      "unidade": "PG",
-      "valor": 11602.99
-    },
-    {
-      "id": "2026-08-05_24",
-      "fornecedor": "AMIL - TRF",
-      "status": "Saida",
-      "conta": "Assistencia Médica",
-      "unidade": "PG",
-      "valor": 6397.62
-    },
-    {
-      "id": "2026-08-05_25",
-      "fornecedor": "AMIL - CPV",
-      "status": "Saida",
-      "conta": "Assistencia Médica",
-      "unidade": "VP",
-      "valor": 149.27
-    },
-    {
-      "id": "2026-08-05_26",
-      "fornecedor": "VR - CPV",
-      "status": "Saida",
-      "conta": "Vale refeição",
-      "unidade": "VP",
-      "valor": 519.3299999999999
-    },
-    {
-      "id": "2026-08-05_27",
-      "fornecedor": "Serasa - CPV",
-      "status": "Saida",
-      "conta": "Despesa Adm",
-      "unidade": "VP",
-      "valor": 50.88
-    },
-    {
-      "id": "2026-08-05_28",
-      "fornecedor": "Aluguel - Sergio (mirantte)",
-      "status": "Saida",
-      "conta": "Aluguel",
-      "unidade": "PG",
-      "valor": 5287.27
-    },
-    {
-      "id": "2026-08-05_29",
-      "fornecedor": "WellHub",
-      "status": "Saida",
-      "conta": "Beneficios",
-      "unidade": "VP",
-      "valor": 3036.87
-    },
-    {
-      "id": "2026-08-05_30",
-      "fornecedor": "Regina Celia 4/6",
-      "status": "Saida",
-      "conta": "Processo trabalhista ",
-      "unidade": "VP",
-      "valor": 4204.49
-    },
-    {
-      "id": "2026-08-05_31",
-      "fornecedor": "Ana Rachel 4/10",
-      "status": "Saida",
-      "conta": "Processo trabalhista ",
-      "unidade": "VP",
-      "valor": 5739.02
-    },
-    {
-      "id": "2026-08-05_32",
-      "fornecedor": "Isaac",
-      "status": "Entrada",
-      "conta": "Mensalidades",
-      "unidade": "VP",
-      "valor": 653271.27
-    },
-    {
-      "id": "2026-08-05_33",
-      "fornecedor": "Isaac",
-      "status": "Entrada",
-      "conta": "Mensalidades",
-      "unidade": "PG",
-      "valor": 161100.17
-    },
-    {
-      "id": "2026-08-05_34",
-      "fornecedor": "Mercado Livre",
-      "status": "Saida",
-      "conta": "Compra Pedagogica",
-      "unidade": "PG",
-      "valor": 2800
-    }
-  ],
-  "2026-08-06": [
-    {
-      "id": "2026-08-06_0",
-      "fornecedor": "KFK Tintas",
-      "status": "Saida",
-      "conta": "Obra VP",
-      "unidade": "VP",
-      "valor": 1410.7
-    },
-    {
-      "id": "2026-08-06_1",
-      "fornecedor": "KFK Tintas",
-      "status": "Saida",
-      "conta": "Obra VP",
-      "unidade": "VP",
-      "valor": 1191.33
-    }
-  ],
-  "2026-08-07": [
-    {
-      "id": "2026-08-07_0",
-      "fornecedor": "RM Hortifruti",
-      "status": "Saida",
-      "conta": "Acordo Cozinha",
-      "unidade": "VP",
-      "valor": 3858.32
-    },
-    {
-      "id": "2026-08-07_1",
-      "fornecedor": "RM Hortifruti",
-      "status": "Saida",
-      "conta": "Acordo Cozinha",
-      "unidade": "VP",
-      "valor": 2801.12
-    }
-  ]
-},
+  lancamentos_por_dia: {},
   aprovacoes: {},
+  orcamento_areas: {
+    'Pedagógico': {}, 'Administrativo': {}, 'Manutenção': {}, 'Marketing/Comercial': {}, 'RH': {},
+  },
+  rentabilidade_salas: [],
   balanco: {
     ativo_circ: {
       'Caixa e Equivalentes':    { val: 0, bud: 0, cod:'1.1.01' },
@@ -1476,11 +1242,74 @@ function initFluxoDiarioCharts() {
     fluxoDiaSelecionado = dias.length ? dias[0] : (fx.dateKeys ? fx.dateKeys[0] : null);
   }
   renderLancamentosDoDia();
+  renderPagamentosPendentes();
 }
 
 function selecionarDiaFluxo(key) {
   fluxoDiaSelecionado = key;
   initFluxoDiarioCharts();
+}
+
+let mostrarSoPendentes = true;
+
+function renderPagamentosPendentes() {
+  const fmtR = v => 'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0});
+  const t = document.getElementById('tbl-pendentes');
+  const contador = document.getElementById('pendentes-contador');
+  const btn = document.getElementById('btn-toggle-pendentes');
+  if(!t) return;
+  if(btn) btn.textContent = mostrarSoPendentes ? 'Ver todos' : 'Ver só pendentes/atrasadas';
+
+  const hojeKey = new Date().toISOString().slice(0,10);
+  const fx = DATA.fluxo_diario;
+  let linhas = [];
+  Object.keys(DATA.lancamentos_por_dia || {}).sort().forEach(key=>{
+    DATA.lancamentos_por_dia[key].forEach(l=>{
+      if(l.status!=='Saida' && l.status!=='Saída') return;
+      const ap = DATA.aprovacoes[l.id];
+      const idx = fx.dateKeys ? fx.dateKeys.indexOf(key) : -1;
+      const dataDisplay = idx>=0 ? fx.datas[idx] : key;
+      let apStatus;
+      if(ap && ap.status) {
+        apStatus = ap.status; // Aprovado ou Rejeitado
+      } else {
+        apStatus = (key < hojeKey) ? 'Atrasado' : 'Pendente';
+      }
+      linhas.push({ key, dataDisplay, ...l, apStatus, apNome: (ap && ap.aprovador) || '' });
+    });
+  });
+
+  const totalAtrasados = linhas.filter(l=>l.apStatus==='Atrasado').length;
+  const totalPendentes = linhas.filter(l=>l.apStatus==='Pendente').length;
+  if(contador) {
+    const partes = [];
+    if(totalAtrasados) partes.push(`${totalAtrasados} atrasado(s)`);
+    if(totalPendentes) partes.push(`${totalPendentes} pendente(s)`);
+    contador.textContent = partes.length ? `(${partes.join(' · ')})` : '';
+  }
+
+  if(mostrarSoPendentes) linhas = linhas.filter(l=>l.apStatus==='Atrasado'||l.apStatus==='Pendente');
+
+  // atrasadas primeiro, depois pendentes, depois o resto — mais recentes por último dentro de cada grupo
+  const ordemStatus = { 'Atrasado':0, 'Pendente':1, 'Aprovado':2, 'Rejeitado':3 };
+  linhas.sort((a,b)=> (ordemStatus[a.apStatus]-ordemStatus[b.apStatus]) || (a.key<b.key?-1:1));
+
+  if(!linhas.length){
+    t.innerHTML = `<tbody><tr><td style="color:var(--muted);padding:14px 0">${mostrarSoPendentes ? '🎉 Nenhuma conta atrasada ou pendente!' : 'Nenhum lançamento importado ainda.'}</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `<thead><tr><th>Data</th><th>Fornecedor</th><th>Conta Contábil</th><th>Unidade</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+    <tbody>${linhas.map(l=>{
+      const tag = l.apStatus==='Aprovado' ? '<span class="pos-cell" style="font-weight:700">✔ Aprovado</span>'
+                : l.apStatus==='Rejeitado' ? '<span class="neg-cell" style="font-weight:700">✘ Rejeitado</span>'
+                : l.apStatus==='Atrasado' ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
+                : '<span style="color:var(--muted);font-weight:700">⏳ Pendente</span>';
+      const linhaBg = l.apStatus==='Atrasado' ? 'style="background:#FDECEA"' : '';
+      return `<tr ${linhaBg}><td>${l.dataDisplay}</td><td>${l.fornecedor}</td><td>${l.conta}</td><td>${l.unidade||''}</td>
+        <td class="neg-cell">${fmtR(l.valor)}</td><td>${tag}</td>
+        <td><button onclick="selecionarDiaFluxo('${l.key}')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:11px">Ver dia</button></td></tr>`;
+    }).join('')}</tbody>`;
 }
 
 function renderLancamentosDoDia() {
@@ -1509,8 +1338,11 @@ function renderLancamentosDoDia() {
     <tbody>${lista.map(l=>{
       const isSaida = l.status==='Saida' || l.status==='Saída';
       const ap = DATA.aprovacoes[l.id] || {};
+      const hojeKey = new Date().toISOString().slice(0,10);
+      const atrasado = !ap.status && fluxoDiaSelecionado < hojeKey;
       const tag = ap.status==='Aprovado' ? '<span class="pos-cell" style="font-weight:700">✔ Aprovado</span>'
                 : ap.status==='Rejeitado' ? '<span class="neg-cell" style="font-weight:700">✘ Rejeitado</span>'
+                : atrasado ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
                 : '<span style="color:var(--muted)">Pendente</span>';
       const aprovacaoCel = isSaida
         ? `${statusBtn(l.id,'Aprovado','✔ Aprovar','#2ECC71')}${statusBtn(l.id,'Rejeitado','✘ Rejeitar','#E74C3C')}
@@ -1529,11 +1361,15 @@ function marcarAprovacao(id, status) {
   // clicar de novo no mesmo status desmarca (volta pra Pendente)
   if(atual && atual.status===status) {
     delete DATA.aprovacoes[id];
+    if(window.removerAprovacaoFirestore) window.removerAprovacaoFirestore(id);
   } else {
-    DATA.aprovacoes[id] = { status, aprovador: nome, data: new Date().toLocaleString('pt-BR') };
+    const registro = { status, aprovador: nome, data: new Date().toLocaleString('pt-BR') };
+    DATA.aprovacoes[id] = registro;
+    if(window.salvarAprovacaoFirestore) window.salvarAprovacaoFirestore(id, registro);
   }
   try { localStorage.setItem('fpa_aprovacoes', JSON.stringify(DATA.aprovacoes)); } catch(e) {}
   renderLancamentosDoDia();
+  renderPagamentosPendentes();
 }
 
 function todosLancamentosComAprovacao() {
@@ -2004,6 +1840,235 @@ function initBalancoCharts() {
   });
 }
 
+// ── ORÇAMENTO POR ÁREA PAGE ──
+let areaOrcamentoSelecionada = 'Pedagógico';
+
+function mudarAreaOrcamento(area) {
+  areaOrcamentoSelecionada = area;
+  initOrcamentoAreasCharts();
+}
+
+function initOrcamentoAreasCharts() {
+  const sel = document.getElementById('filtro-area-orcamento');
+  if(sel) sel.value = areaOrcamentoSelecionada;
+  const titulo = document.getElementById('orcamento-area-titulo');
+  if(titulo) titulo.textContent = areaOrcamentoSelecionada;
+
+  const area = DATA.orcamento_areas[areaOrcamentoSelecionada] || {};
+  const categorias = Object.keys(area);
+  const fmtR = v => 'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0});
+
+  let totalBudget = 0, totalReal = 0;
+  const budgetYTD = [], realYTD = [];
+  categorias.forEach(cat => {
+    const b = area[cat].budget.reduce((a,v)=>a+v,0);
+    const r = area[cat].real.reduce((a,v)=>a+v,0);
+    budgetYTD.push(b); realYTD.push(r);
+    totalBudget += b; totalReal += r;
+  });
+  const variacao = totalBudget ? ((totalReal-totalBudget)/totalBudget*100) : 0;
+
+  const kpiRow = document.getElementById('orcamento-kpi-row');
+  if(kpiRow) kpiRow.innerHTML = [
+    { label:'BUDGET TOTAL (YTD)', val:fmtR(totalBudget), icon:'🎯', bg:'#EAF0FF' },
+    { label:'REAL TOTAL (YTD)', val:fmtR(totalReal), icon:'💵', bg: totalReal<=totalBudget?'#EAFAF1':'#F9EBEA' },
+    { label:'VARIAÇÃO vs BUDGET', val:(variacao>=0?'+':'')+variacao.toFixed(1)+'%', icon:'📊',
+      bg: variacao<=0?'#EAFAF1':'#F9EBEA' },
+  ].map(k=>`
+    <div class="kpi-card">
+      <div style="flex:1">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value" style="font-size:19px">${k.val}</div>
+      </div>
+      <div class="kpi-icon" style="background:${k.bg};font-size:18px">${k.icon}</div>
+    </div>`).join('');
+
+  destroyChart('chart-orcamento-categorias');
+  const c1 = document.getElementById('chart-orcamento-categorias');
+  if(c1 && categorias.length) {
+    charts['chart-orcamento-categorias'] = new Chart(c1, {
+      type:'bar',
+      data:{ labels:categorias,
+        datasets:[
+          { label:'Budget', data:budgetYTD, backgroundColor:'#94A3B8', borderRadius:4 },
+          { label:'Real', data:realYTD, backgroundColor:'#1B2A4A', borderRadius:4 },
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'top',labels:{font:{size:10}}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+                y:{grid:{color:'#EEE'},ticks:{font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}}}
+      }
+    });
+  }
+
+  destroyChart('chart-orcamento-mensal');
+  const c2 = document.getElementById('chart-orcamento-mensal');
+  if(c2) {
+    const budgetMensal = MESES_SHORT.map((_,i)=> categorias.reduce((a,cat)=>a+(area[cat].budget[i]||0),0));
+    const realMensal = MESES_SHORT.map((_,i)=> categorias.reduce((a,cat)=>a+(area[cat].real[i]||0),0));
+    charts['chart-orcamento-mensal'] = new Chart(c2, {
+      type:'line',
+      data:{ labels:MESES_SHORT,
+        datasets:[
+          { label:'Budget', data:budgetMensal, borderColor:'#94A3B8', borderWidth:2, tension:.3, pointRadius:2 },
+          { label:'Real', data:realMensal, borderColor:'#1B2A4A', borderWidth:2.5, tension:.3, pointRadius:2 },
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'top',labels:{font:{size:10}}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+                y:{grid:{color:'#EEE'},ticks:{font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}}}
+      }
+    });
+  }
+}
+
+// ── RENTABILIDADE POR SALA PAGE ──
+function initRentSalasCharts() {
+  const salas = DATA.rentabilidade_salas || [];
+  const fmtR = v => 'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0});
+
+  const kpiRow = document.getElementById('rentsalas-kpi-row');
+  if(!salas.length) {
+    if(kpiRow) kpiRow.innerHTML = '';
+    destroyChart('chart-rentsalas');
+    const t0 = document.getElementById('tbl-rentsalas');
+    if(t0) t0.innerHTML = '<tbody><tr><td style="color:var(--muted);padding:14px 0">Nenhum dado importado ainda. Use o botão "Importar Orçamento por Área".</td></tr></tbody>';
+    return;
+  }
+
+  const ordenadas = [...salas].sort((a,b)=> b.margemPct - a.margemPct);
+  const totalAlunos = salas.reduce((a,s)=>a+s.alunos,0);
+  const margemMedia = salas.reduce((a,s)=>a+s.margemPct,0)/salas.length;
+  const melhor = ordenadas[0], pior = ordenadas[ordenadas.length-1];
+
+  if(kpiRow) kpiRow.innerHTML = [
+    { label:'TOTAL DE ALUNOS', val:totalAlunos, icon:'🎓', bg:'#EAF0FF' },
+    { label:'MARGEM MÉDIA', val:margemMedia.toFixed(1)+'%', icon:'📊', bg: margemMedia>=0?'#EAFAF1':'#F9EBEA' },
+    { label:'MELHOR TURMA', val:`${melhor.turma} (${melhor.margemPct.toFixed(1)}%)`, icon:'🏆', bg:'#EAFAF1' },
+    { label:'PIOR TURMA', val:`${pior.turma} (${pior.margemPct.toFixed(1)}%)`, icon:'⚠️', bg:'#F9EBEA' },
+  ].map(k=>`
+    <div class="kpi-card">
+      <div style="flex:1">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value" style="font-size:17px">${k.val}</div>
+      </div>
+      <div class="kpi-icon" style="background:${k.bg};font-size:18px">${k.icon}</div>
+    </div>`).join('');
+
+  destroyChart('chart-rentsalas');
+  const c = document.getElementById('chart-rentsalas');
+  if(c) {
+    charts['chart-rentsalas'] = new Chart(c, {
+      type:'bar',
+      data:{ labels: ordenadas.map(s=>s.turma),
+        datasets:[{ label:'Margem (%)', data: ordenadas.map(s=>s.margemPct),
+          backgroundColor: ordenadas.map(s=>s.margemPct>=0?'#2ECC71':'#E74C3C'), borderRadius:4 }]
+      },
+      options:{responsive:true,maintainAspectRatio:false, indexAxis:'y',
+        plugins:{legend:{display:false}},
+        scales:{x:{grid:{color:'#EEE'},ticks:{font:{size:10},callback:v=>v+'%'}},
+                y:{grid:{display:false},ticks:{font:{size:10}}}}
+      }
+    });
+  }
+
+  const t = document.getElementById('tbl-rentsalas');
+  if(t) t.innerHTML = `<thead><tr><th>Turma/Sala</th><th>Nº Alunos</th><th>Receita Mensal</th><th>Custo Direto</th><th>Margem (R$)</th><th>Margem (%)</th></tr></thead>
+    <tbody>${ordenadas.map(s=>`
+      <tr><td>${s.turma}</td><td>${s.alunos}</td><td>${fmtR(s.receita)}</td><td>${fmtR(s.custo)}</td>
+        <td class="${s.margem>=0?'pos-cell':'neg-cell'}">${fmtR(s.margem)}</td>
+        <td class="${s.margemPct>=0?'pos-cell':'neg-cell'}">${s.margemPct.toFixed(1)}%</td></tr>`).join('')}</tbody>`;
+}
+
+// ── IMPORT: ORÇAMENTO POR ÁREA + RENTABILIDADE POR SALA ──
+function importOrcamentoAreas(evt) {
+  const files = Array.from(evt.target.files || []);
+  if(!files.length) return;
+
+  const mapaArquivos = {
+    'orcamento_pedagogico': 'Pedagógico',
+    'orcamento_administrativo': 'Administrativo',
+    'orcamento_manutencao': 'Manutenção',
+    'orcamento_marketing': 'Marketing/Comercial',
+    'orcamento_rh': 'RH',
+  };
+
+  let processados = 0, comErro = [];
+
+  function processarArquivo(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const wb = XLSX.read(e.target.result, {type:'binary'});
+          const nomeArquivo = file.name.replace(/\.xlsx?$/i,'').toLowerCase();
+
+          if(nomeArquivo === 'rentabilidade_salas') {
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(ws, {header:1}).slice(2);
+            const salas = [];
+            rows.forEach(r=>{
+              if(!r[0] || typeof r[2]!=='number') return;
+              const alunos = typeof r[1]==='number' ? r[1] : 0;
+              const receita = typeof r[2]==='number' ? r[2] : 0;
+              const custo = typeof r[3]==='number' ? r[3] : 0;
+              const margem = receita - custo;
+              const margemPct = receita ? (margem/receita*100) : 0;
+              salas.push({ turma:String(r[0]), alunos, receita, custo, margem, margemPct });
+            });
+            if(salas.length) DATA.rentabilidade_salas = salas;
+            resolve(true);
+            return;
+          }
+
+          const areaLabel = mapaArquivos[nomeArquivo];
+          if(!areaLabel) {
+            comErro.push(`${file.name} (nome não reconhecido)`);
+            resolve(false);
+            return;
+          }
+
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, {header:1}).slice(2);
+          const itens = {};
+          rows.forEach(r=>{
+            if(!r[1] || !r[2]) return;
+            const categoria = r[0] ? String(r[0]) : 'Outros';
+            const item = String(r[1]);
+            const tipo = String(r[2]).trim().toLowerCase();
+            if(tipo!=='budget' && tipo!=='real') return;
+            const vals = r.slice(3,15).map(v=> typeof v==='number' ? v : 0);
+            if(!itens[item]) itens[item] = { categoria, budget:[0,0,0,0,0,0,0,0,0,0,0,0], real:[0,0,0,0,0,0,0,0,0,0,0,0] };
+            itens[item].categoria = categoria;
+            itens[item][tipo] = vals;
+          });
+          if(Object.keys(itens).length) DATA.orcamento_areas[areaLabel] = itens;
+          resolve(true);
+        } catch(err) {
+          comErro.push(`${file.name} (${err.message})`);
+          resolve(false);
+        }
+      };
+      reader.readAsBinaryString(file);
+    });
+  }
+
+  Promise.all(files.map(processarArquivo)).then(resultados => {
+    processados = resultados.filter(Boolean).length;
+    initOrcamentoAreasCharts();
+    initRentSalasCharts();
+    if(comErro.length) {
+      showToast(`⚠️ ${processados} arquivo(s) importado(s), mas houve problema com: ${comErro.join(', ')}`);
+    } else {
+      showToast(`✅ ${processados} arquivo(s) importado(s) com sucesso!`);
+    }
+  });
+
+  evt.target.value = '';
+}
+
 
 function initDetalheCharts() {
   const t = document.getElementById('tbl-var');
@@ -2069,6 +2134,8 @@ const PAGE_META = {
   fluxodiario: { title:'FLUXO DE CAIXA DIÁRIO',    sub:'Entradas, saídas e saldo dia a dia' },
   forecast:{ title:'PLANEJAMENTO & FORECAST',      sub:'Budget vs Forecast vs Real' },
   balanco: { title:'BALANCO PATRIMONIAL', sub:'Estrutura patrimonial, liquidez e rentabilidade' },
+  orcamentoareas: { title:'ORÇAMENTO POR ÁREA', sub:'Budget vs Real por departamento do colégio' },
+  rentsalas: { title:'RENTABILIDADE POR SALA', sub:'Margem por turma/sala de aula' },
   detalhe: { title:'DETALHAMENTO',                 sub:'Análise de variações vs Budget' },
   config:  { title:'CONFIGURAÇÕES',                sub:'Personalização do dashboard por cliente' },
 };
@@ -2091,6 +2158,8 @@ function navigate(el, page) {
     if(page==='fluxodiario') initFluxoDiarioCharts();
     if(page==='forecast')initForecastCharts();
     if(page==='balanco') initBalancoCharts();
+    if(page==='orcamentoareas') initOrcamentoAreasCharts();
+    if(page==='rentsalas') initRentSalasCharts();
     if(page==='detalhe') initDetalheCharts();
   }, 50);
 }
@@ -2362,6 +2431,63 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTop5();
   setTimeout(initVisaoCharts, 100);
 });
+</script>
+<script type="module">
+  // ══════════════════════════════════════════════════════════
+  // FIREBASE — sincroniza as aprovações de pagamento entre todos
+  // os computadores/navegadores que abrirem este dashboard.
+  // ══════════════════════════════════════════════════════════
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import {
+    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC20RdSQ_a7MZhZBVo2T8ttd2nWBe-QY1g",
+    authDomain: "painel-financeiro-colegio.firebaseapp.com",
+    projectId: "painel-financeiro-colegio",
+    storageBucket: "painel-financeiro-colegio.firebasestorage.app",
+    messagingSenderId: "846726854779",
+    appId: "1:846726854779:web:f5cd87b5b74facc4fa4ade",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const aprovacoesRef = collection(db, "aprovacoes");
+
+  // grava/atualiza uma aprovação
+  window.salvarAprovacaoFirestore = async function(id, registro) {
+    try {
+      await setDoc(doc(aprovacoesRef, id), registro);
+    } catch (err) {
+      console.error("Erro ao salvar no Firebase:", err);
+      if (typeof showToast === 'function') showToast('⚠️ Aprovação salva só localmente (falha ao conectar no Firebase).');
+    }
+  };
+
+  // remove uma aprovação (volta pra Pendente)
+  window.removerAprovacaoFirestore = async function(id) {
+    try {
+      await deleteDoc(doc(aprovacoesRef, id));
+    } catch (err) {
+      console.error("Erro ao remover no Firebase:", err);
+    }
+  };
+
+  // escuta em tempo real: qualquer aprovação feita em QUALQUER computador
+  // atualiza a tela de todo mundo que estiver com o dashboard aberto
+  onSnapshot(aprovacoesRef, (snapshot) => {
+    const novasAprovacoes = {};
+    snapshot.forEach((docSnap) => {
+      novasAprovacoes[docSnap.id] = docSnap.data();
+    });
+    DATA.aprovacoes = novasAprovacoes;
+    try { localStorage.setItem('fpa_aprovacoes', JSON.stringify(DATA.aprovacoes)); } catch (e) {}
+    if (typeof renderLancamentosDoDia === 'function') renderLancamentosDoDia();
+    if (typeof renderPagamentosPendentes === 'function') renderPagamentosPendentes();
+  }, (err) => {
+    console.error("Erro ao escutar o Firebase (usando só os dados locais):", err);
+  });
 </script>
 </body>
 </html>
