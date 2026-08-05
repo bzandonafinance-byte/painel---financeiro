@@ -461,14 +461,9 @@
       </div>
 
       <div class="card" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-          <div>
-            <div class="card-title">⏳ PAGAMENTOS PENDENTES <span id="pendentes-contador"></span></div>
-            <div class="card-sub">Todas as saídas ainda não aprovadas/rejeitadas, de todos os dias</div>
-          </div>
-          <button class="btn-export" style="background:#95A5A6" onclick="mostrarSoPendentes = !mostrarSoPendentes; renderPagamentosPendentes();" id="btn-toggle-pendentes">
-            Ver só pendentes
-          </button>
+        <div>
+          <div class="card-title">⏳ PAGAMENTOS PENDENTES <span id="pendentes-contador"></span></div>
+          <div class="card-sub">Aprovados/rejeitados saem daqui automaticamente — histórico completo fica no Excel exportado</div>
         </div>
         <div style="overflow-x:auto;margin-top:12px;max-height:320px;overflow-y:auto">
           <table class="data-table" id="tbl-pendentes"></table>
@@ -1569,15 +1564,11 @@ function selecionarDiaFluxo(key) {
   initFluxoDiarioCharts();
 }
 
-let mostrarSoPendentes = true;
-
 function renderPagamentosPendentes() {
   const fmtR = v => 'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0});
   const t = document.getElementById('tbl-pendentes');
   const contador = document.getElementById('pendentes-contador');
-  const btn = document.getElementById('btn-toggle-pendentes');
   if(!t) return;
-  if(btn) btn.textContent = mostrarSoPendentes ? 'Ver todos' : 'Ver só pendentes/atrasadas';
 
   const hojeKey = new Date().toISOString().slice(0,10);
   const fx = DATA.fluxo_diario;
@@ -1586,15 +1577,11 @@ function renderPagamentosPendentes() {
     DATA.lancamentos_por_dia[key].forEach(l=>{
       if(l.status!=='Saida' && l.status!=='Saída') return;
       const ap = DATA.aprovacoes[l.id];
+      if(ap && ap.status) return; // já decidido (Aprovado/Rejeitado) — some da lista ativa
       const idx = fx.dateKeys ? fx.dateKeys.indexOf(key) : -1;
       const dataDisplay = idx>=0 ? fx.datas[idx] : key;
-      let apStatus;
-      if(ap && ap.status) {
-        apStatus = ap.status; // Aprovado ou Rejeitado
-      } else {
-        apStatus = (key < hojeKey) ? 'Atrasado' : 'Pendente';
-      }
-      linhas.push({ key, dataDisplay, ...l, apStatus, apNome: (ap && ap.aprovador) || '' });
+      const apStatus = (key < hojeKey) ? 'Atrasado' : 'Pendente';
+      linhas.push({ key, dataDisplay, ...l, apStatus });
     });
   });
 
@@ -1607,22 +1594,17 @@ function renderPagamentosPendentes() {
     contador.textContent = partes.length ? `(${partes.join(' · ')})` : '';
   }
 
-  if(mostrarSoPendentes) linhas = linhas.filter(l=>l.apStatus==='Atrasado'||l.apStatus==='Pendente');
-
-  // atrasadas primeiro, depois pendentes, depois o resto — mais recentes por último dentro de cada grupo
-  const ordemStatus = { 'Atrasado':0, 'Pendente':1, 'Aprovado':2, 'Rejeitado':3 };
-  linhas.sort((a,b)=> (ordemStatus[a.apStatus]-ordemStatus[b.apStatus]) || (a.key<b.key?-1:1));
+  // atrasadas primeiro, depois pendentes
+  linhas.sort((a,b)=> (a.apStatus==='Atrasado'?0:1)-(b.apStatus==='Atrasado'?0:1) || (a.key<b.key?-1:1));
 
   if(!linhas.length){
-    t.innerHTML = `<tbody><tr><td style="color:var(--muted);padding:14px 0">${mostrarSoPendentes ? '🎉 Nenhuma conta atrasada ou pendente!' : 'Nenhum lançamento importado ainda.'}</td></tr></tbody>`;
+    t.innerHTML = `<tbody><tr><td style="color:var(--muted);padding:14px 0">🎉 Nenhuma conta atrasada ou pendente! (aprovados/rejeitados ficam só no Excel exportado)</td></tr></tbody>`;
     return;
   }
 
   t.innerHTML = `<thead><tr><th>Data</th><th>Fornecedor</th><th>Conta Contábil</th><th>Unidade</th><th>Valor</th><th>Status</th><th></th></tr></thead>
     <tbody>${linhas.map(l=>{
-      const tag = l.apStatus==='Aprovado' ? '<span class="pos-cell" style="font-weight:700">✔ Aprovado</span>'
-                : l.apStatus==='Rejeitado' ? '<span class="neg-cell" style="font-weight:700">✘ Rejeitado</span>'
-                : l.apStatus==='Atrasado' ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
+      const tag = l.apStatus==='Atrasado' ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
                 : '<span style="color:var(--muted);font-weight:700">⏳ Pendente</span>';
       const linhaBg = l.apStatus==='Atrasado' ? 'style="background:#FDECEA"' : '';
       return `<tr ${linhaBg}><td>${l.dataDisplay}</td><td>${l.fornecedor}</td><td>${l.conta}</td><td>${l.unidade||''}</td>
@@ -1637,13 +1619,14 @@ function renderLancamentosDoDia() {
   const t = document.getElementById('tbl-lancamentos-dia');
   if(!t) return;
   const lista = lancamentosDoDiaFiltrados(fluxoDiaSelecionado)
-    .filter(l => l.status==='Saida' || l.status==='Saída');
+    .filter(l => l.status==='Saida' || l.status==='Saída')
+    .filter(l => !(DATA.aprovacoes[l.id] && DATA.aprovacoes[l.id].status)); // já decididos somem daqui
   const fx = DATA.fluxo_diario;
   const idx = fx.dateKeys ? fx.dateKeys.indexOf(fluxoDiaSelecionado) : -1;
   if(titulo) titulo.textContent = idx>=0 ? fx.datas[idx] : (fluxoDiaSelecionado || '—');
 
   if(!lista.length){
-    t.innerHTML = `<tbody><tr><td style="color:var(--muted);padding:14px 0">Nenhum lançamento nesse dia.</td></tr></tbody>`;
+    t.innerHTML = `<tbody><tr><td style="color:var(--muted);padding:14px 0">Nenhuma saída pendente nesse dia (aprovadas/rejeitadas ficam só no Excel exportado).</td></tr></tbody>`;
     return;
   }
   const statusBtn = (id, status, label, color) => {
@@ -1659,9 +1642,7 @@ function renderLancamentosDoDia() {
       const ap = DATA.aprovacoes[l.id] || {};
       const hojeKey = new Date().toISOString().slice(0,10);
       const atrasado = !ap.status && fluxoDiaSelecionado < hojeKey;
-      const tag = ap.status==='Aprovado' ? '<span class="pos-cell" style="font-weight:700">✔ Aprovado</span>'
-                : ap.status==='Rejeitado' ? '<span class="neg-cell" style="font-weight:700">✘ Rejeitado</span>'
-                : atrasado ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
+      const tag = atrasado ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
                 : '<span style="color:var(--muted)">Pendente</span>';
       const aprovacaoCel = isSaida
         ? `${statusBtn(l.id,'Aprovado','✔ Aprovar','#2ECC71')}${statusBtn(l.id,'Rejeitado','✘ Rejeitar','#E74C3C')}
