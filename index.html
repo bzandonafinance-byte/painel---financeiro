@@ -221,8 +221,24 @@
     <div class="nav-item" data-page="balanco" onclick="navigate(this,'balanco')">
       <span class="icon">🏦</span> Balanço Patrimonial
     </div>
-    <div class="nav-item" data-page="orcamentoareas" onclick="navigate(this,'orcamentoareas')">
-      <span class="icon">🏫</span> Orçamento por Área
+    <div class="nav-item" data-page="orcamentoareas" onclick="toggleSubmenuAreas(event)" style="justify-content:space-between;display:flex;align-items:center">
+      <span><span class="icon">🏫</span> Orçamento por Área</span>
+      <span id="seta-submenu-areas" style="font-size:10px;transition:transform .15s">▶</span>
+    </div>
+    <div id="submenu-areas" style="display:none">
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Financeiro" onclick="navigateArea(this,'Financeiro')" style="padding-left:34px;font-size:13px">💰 Financeiro</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="RH" onclick="navigateArea(this,'RH')" style="padding-left:34px;font-size:13px">👥 RH</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Comercial" onclick="navigateArea(this,'Comercial')" style="padding-left:34px;font-size:13px">🤝 Comercial</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Pedagogico" onclick="navigateArea(this,'Pedagogico')" style="padding-left:34px;font-size:13px">📘 Pedagogico</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Marketing" onclick="navigateArea(this,'Marketing')" style="padding-left:34px;font-size:13px">📣 Marketing</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Compras" onclick="navigateArea(this,'Compras')" style="padding-left:34px;font-size:13px">🛒 Compras</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Enfermaria" onclick="navigateArea(this,'Enfermaria')" style="padding-left:34px;font-size:13px">🩺 Enfermaria</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Manutenção" onclick="navigateArea(this,'Manutenção')" style="padding-left:34px;font-size:13px">🔧 Manutenção</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="TI" onclick="navigateArea(this,'TI')" style="padding-left:34px;font-size:13px">💻 TI</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Portaria" onclick="navigateArea(this,'Portaria')" style="padding-left:34px;font-size:13px">🚪 Portaria</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Limpeza" onclick="navigateArea(this,'Limpeza')" style="padding-left:34px;font-size:13px">🧹 Limpeza</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Papelaria" onclick="navigateArea(this,'Papelaria')" style="padding-left:34px;font-size:13px">📎 Papelaria</div>
+      <div class="nav-item nav-subitem" data-page="orcamentoareas" data-area="Cantina" onclick="navigateArea(this,'Cantina')" style="padding-left:34px;font-size:13px">🍽️ Cantina</div>
     </div>
     <div class="nav-item" data-page="rentsalas" onclick="navigate(this,'rentsalas')">
       <span class="icon">🎓</span> Rentabilidade por Sala
@@ -588,11 +604,19 @@
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:2px">Área</label>
           <select id="filtro-area-orcamento" onchange="mudarAreaOrcamento(this.value)"
             style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;min-width:220px">
-            <option value="Pedagógico">Pedagógico</option>
-            <option value="Administrativo">Administrativo</option>
-            <option value="Manutenção">Manutenção</option>
-            <option value="Marketing/Comercial">Marketing/Comercial</option>
+            <option value="Financeiro">Financeiro</option>
             <option value="RH">RH</option>
+            <option value="Comercial">Comercial</option>
+            <option value="Pedagogico">Pedagogico</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Compras">Compras</option>
+            <option value="Enfermaria">Enfermaria</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="TI">TI</option>
+            <option value="Portaria">Portaria</option>
+            <option value="Limpeza">Limpeza</option>
+            <option value="Papelaria">Papelaria</option>
+            <option value="Cantina">Cantina</option>
           </select>
         </div>
         <button class="btn-export" style="background:#E74C3C" onclick="document.getElementById('upload-input-orcamento').click()"
@@ -605,7 +629,7 @@
       <div class="kpi-row" id="orcamento-kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px"></div>
 
       <div class="card" style="margin-bottom:14px">
-        <div class="card-title">BUDGET VS REAL POR ITEM — <span id="orcamento-area-titulo">Pedagógico</span></div>
+        <div class="card-title">BUDGET VS REAL POR ITEM — <span id="orcamento-area-titulo">Pedagogico</span></div>
         <div class="card-sub">R$, acumulado no ano (YTD)</div>
         <div class="chart-wrap" style="height:280px"><canvas id="chart-orcamento-categorias"></canvas></div>
       </div>
@@ -784,6 +808,8 @@ let DATA = {
       "fornecedor": "Sabesp Arbues, 36",
       "status": "Saida",
       "conta": "Conta de consumo",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 81.24
     },
@@ -792,7 +818,9 @@ let DATA = {
       "fornecedor": "KFK Tintas",
       "status": "Saida",
       "conta": "Obra VP",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 299.97
     },
     {
@@ -800,7 +828,9 @@ let DATA = {
       "fornecedor": "QI solution (acordo)",
       "status": "Saida",
       "conta": "Despesa Adm",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 1737.66
     },
     {
@@ -808,6 +838,8 @@ let DATA = {
       "fornecedor": "QI solution (acordo)",
       "status": "Saida",
       "conta": "Despesa Adm",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 434.46
     },
@@ -816,7 +848,9 @@ let DATA = {
       "fornecedor": "Imax Clean",
       "status": "Saida",
       "conta": "Higiene",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 3991
     },
     {
@@ -824,7 +858,9 @@ let DATA = {
       "fornecedor": "Ideal Desentupidora",
       "status": "Saida",
       "conta": "Manutenção",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 2000
     },
     {
@@ -832,7 +868,9 @@ let DATA = {
       "fornecedor": "Reembolso José Roberto",
       "status": "Saida",
       "conta": "Manutenção",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 1226.82
     },
     {
@@ -840,7 +878,9 @@ let DATA = {
       "fornecedor": "Reembolso José Roberto",
       "status": "Saida",
       "conta": "Manutenção",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 2781.96
     },
     {
@@ -848,7 +888,9 @@ let DATA = {
       "fornecedor": "Reembolso José Roberto",
       "status": "Saida",
       "conta": "Manutenção",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 343.76
     },
     {
@@ -856,7 +898,9 @@ let DATA = {
       "fornecedor": "Sun Axix",
       "status": "Saida",
       "conta": "Manutenção de ar-condicionado",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 5185
     },
     {
@@ -864,6 +908,8 @@ let DATA = {
       "fornecedor": "Sun Axix",
       "status": "Saida",
       "conta": "Manutenção de ar-condicionado",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 680
     },
@@ -872,7 +918,9 @@ let DATA = {
       "fornecedor": "Reembolso Luciana",
       "status": "Saida",
       "conta": "Compra de Lousa",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 4598.44
     },
     {
@@ -880,7 +928,9 @@ let DATA = {
       "fornecedor": "VR - LAC",
       "status": "Saida",
       "conta": "Vale refeição",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 4530.5
     },
     {
@@ -888,7 +938,9 @@ let DATA = {
       "fornecedor": "AMIL - LAC",
       "status": "Saida",
       "conta": "Assistencia Médica",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 2161.74
     },
     {
@@ -896,7 +948,9 @@ let DATA = {
       "fornecedor": "VR - PRC",
       "status": "Saida",
       "conta": "Vale refeição",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 7414.17
     },
     {
@@ -904,7 +958,9 @@ let DATA = {
       "fornecedor": "AMIL - PRC",
       "status": "Saida",
       "conta": "Assistencia Médica",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 5341.78
     },
     {
@@ -912,7 +968,9 @@ let DATA = {
       "fornecedor": "Fabiana Regina 3/3",
       "status": "Saida",
       "conta": "Verbas Rescisórias",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 3856.77
     },
     {
@@ -920,7 +978,9 @@ let DATA = {
       "fornecedor": "Geovana Ribeiro 3/4",
       "status": "Saida",
       "conta": "Verbas Rescisórias",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 4421.08
     },
     {
@@ -928,7 +988,9 @@ let DATA = {
       "fornecedor": "VR - KMR",
       "status": "Saida",
       "conta": "Vale refeição",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 7175
     },
     {
@@ -936,7 +998,9 @@ let DATA = {
       "fornecedor": "AMIL - KMR",
       "status": "Saida",
       "conta": "Assistencia Médica",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 2759.86
     },
     {
@@ -944,7 +1008,9 @@ let DATA = {
       "fornecedor": "Camila Silva 2/3",
       "status": "Saida",
       "conta": "Verbas Rescisórias",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 12153
     },
     {
@@ -952,7 +1018,9 @@ let DATA = {
       "fornecedor": "VR - PHR",
       "status": "Saida",
       "conta": "Vale refeição",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 5965.5
     },
     {
@@ -960,7 +1028,9 @@ let DATA = {
       "fornecedor": "AMIL - PHR",
       "status": "Saida",
       "conta": "Assistencia Médica",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 1551.28
     },
     {
@@ -968,6 +1038,8 @@ let DATA = {
       "fornecedor": "VR - TRF",
       "status": "Saida",
       "conta": "Vale refeição",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 11602.99
     },
@@ -976,6 +1048,8 @@ let DATA = {
       "fornecedor": "AMIL - TRF",
       "status": "Saida",
       "conta": "Assistencia Médica",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 6397.62
     },
@@ -984,7 +1058,9 @@ let DATA = {
       "fornecedor": "AMIL - CPV",
       "status": "Saida",
       "conta": "Assistencia Médica",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 149.27
     },
     {
@@ -992,7 +1068,9 @@ let DATA = {
       "fornecedor": "VR - CPV",
       "status": "Saida",
       "conta": "Vale refeição",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 519.3299999999999
     },
     {
@@ -1000,7 +1078,9 @@ let DATA = {
       "fornecedor": "Serasa - CPV",
       "status": "Saida",
       "conta": "Despesa Adm",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 50.88
     },
     {
@@ -1008,6 +1088,8 @@ let DATA = {
       "fornecedor": "Aluguel - Sergio (mirantte)",
       "status": "Saida",
       "conta": "Aluguel",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 5287.27
     },
@@ -1016,7 +1098,9 @@ let DATA = {
       "fornecedor": "WellHub",
       "status": "Saida",
       "conta": "Beneficios",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 3036.87
     },
     {
@@ -1024,7 +1108,9 @@ let DATA = {
       "fornecedor": "Regina Celia 4/6",
       "status": "Saida",
       "conta": "Processo trabalhista ",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 4204.49
     },
     {
@@ -1032,7 +1118,9 @@ let DATA = {
       "fornecedor": "Ana Rachel 4/10",
       "status": "Saida",
       "conta": "Processo trabalhista ",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 5739.02
     },
     {
@@ -1040,7 +1128,9 @@ let DATA = {
       "fornecedor": "Isaac",
       "status": "Entrada",
       "conta": "Mensalidades",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 653271.27
     },
     {
@@ -1048,6 +1138,8 @@ let DATA = {
       "fornecedor": "Isaac",
       "status": "Entrada",
       "conta": "Mensalidades",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 161100.17
     },
@@ -1056,6 +1148,8 @@ let DATA = {
       "fornecedor": "Mercado Livre",
       "status": "Saida",
       "conta": "Compra Pedagogica",
+      "planoContas": "",
+      "centroCusto": "Não informado",
       "unidade": "PG",
       "valor": 2800
     },
@@ -1064,7 +1158,9 @@ let DATA = {
       "fornecedor": "Samuel (Obra VP)",
       "status": "Saida",
       "conta": "Obra VP",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 10000
     }
   ],
@@ -1074,7 +1170,9 @@ let DATA = {
       "fornecedor": "KFK Tintas",
       "status": "Saida",
       "conta": "Obra VP",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 1410.7
     },
     {
@@ -1082,7 +1180,9 @@ let DATA = {
       "fornecedor": "KFK Tintas",
       "status": "Saida",
       "conta": "Obra VP",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 1191.33
     }
   ],
@@ -1092,7 +1192,9 @@ let DATA = {
       "fornecedor": "RM Hortifruti",
       "status": "Saida",
       "conta": "Acordo Cozinha",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 3858.32
     },
     {
@@ -1100,15 +1202,5684 @@ let DATA = {
       "fornecedor": "RM Hortifruti",
       "status": "Saida",
       "conta": "Acordo Cozinha",
-      "unidade": "VP",
+      "planoContas": "",
+      "centroCusto": "Não informado",
+      "unidade": "Voluntarios",
       "valor": 2801.12
     }
   ]
 },
   aprovacoes: {},
   orcamento_areas: {
-    'Pedagógico': {}, 'Administrativo': {}, 'Manutenção': {}, 'Marketing/Comercial': {}, 'RH': {},
+  "Financeiro": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
   },
+  "RH": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Comercial": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Pedagogico": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Marketing": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Compras": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Enfermaria": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Manutenção": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "TI": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Portaria": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Limpeza": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Papelaria": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Cantina": {
+    "Folha de pagamento": {
+      "categoria": "Folha de pagamento",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciações": {
+      "categoria": "Depreciações",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Energia": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Agua": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Internet": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Limpeza": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Segurança": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Aluguel": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Depreciação predial": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Copa Cozinha": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Locação de impressora": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ERP": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Assinaturas": {
+      "categoria": "Rateios",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Despesas Gerais": {
+      "categoria": "Despesas Gerais",
+      "budget": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "real": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  }
+},
   rentabilidade_salas: [],
   balanco: {
     ativo_circ: {
@@ -1613,12 +7384,12 @@ function renderPagamentosPendentes() {
     return;
   }
 
-  t.innerHTML = `<thead><tr><th>Data</th><th>Fornecedor</th><th>Conta Contábil</th><th>Unidade</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+  t.innerHTML = `<thead><tr><th>Data</th><th>Fornecedor</th><th>Conta Contábil</th><th>Centro de Custo</th><th>Unidade</th><th>Valor</th><th>Status</th><th></th></tr></thead>
     <tbody>${linhas.map(l=>{
       const tag = l.apStatus==='Atrasado' ? '<span class="neg-cell" style="font-weight:700">🔴 Atrasado</span>'
                 : '<span style="color:var(--muted);font-weight:700">⏳ Pendente</span>';
       const linhaBg = l.apStatus==='Atrasado' ? 'style="background:#FDECEA"' : '';
-      return `<tr ${linhaBg}><td>${l.dataDisplay}</td><td>${l.fornecedor}</td><td>${l.conta}</td><td>${l.unidade||''}</td>
+      return `<tr ${linhaBg}><td>${l.dataDisplay}</td><td>${l.fornecedor}</td><td>${l.conta}</td><td>${l.centroCusto||''}</td><td>${l.unidade||''}</td>
         <td class="neg-cell">${fmtR(l.valor)}</td><td>${tag}</td>
         <td><button onclick="selecionarDiaFluxo('${l.key}')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:11px">Ver dia</button></td></tr>`;
     }).join('')}</tbody>`;
@@ -1647,7 +7418,7 @@ function renderLancamentosDoDia() {
       style="padding:4px 9px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;
       border:1px solid ${color};background:${ativo?color:'#fff'};color:${ativo?'#fff':color}">${label}</button>`;
   };
-  t.innerHTML = `<thead><tr><th>Fornecedor / Razão Social</th><th>Conta Contábil</th><th>Unidade</th><th>Status</th><th>Valor</th><th>Aprovação</th></tr></thead>
+  t.innerHTML = `<thead><tr><th>Fornecedor / Razão Social</th><th>Conta Contábil</th><th>Centro de Custo</th><th>Unidade</th><th>Status</th><th>Valor</th><th>Aprovação</th></tr></thead>
     <tbody>${lista.map(l=>{
       const isSaida = l.status==='Saida' || l.status==='Saída';
       const ap = DATA.aprovacoes[l.id] || {};
@@ -1659,7 +7430,7 @@ function renderLancamentosDoDia() {
         ? `${statusBtn(l.id,'Aprovado','✔ Aprovar','#2ECC71')}${statusBtn(l.id,'Rejeitado','✘ Rejeitar','#E74C3C')}
            <div style="margin-top:4px">${tag}</div>`
         : `<span style="color:var(--muted);font-size:11px">— (entrada, não requer aprovação)</span>`;
-      return `<tr><td>${l.fornecedor}</td><td>${l.conta}</td><td>${l.unidade || 'Não informado'}</td>
+      return `<tr><td>${l.fornecedor}</td><td>${l.conta}</td><td>${l.centroCusto || 'Não informado'}</td><td>${l.unidade || 'Não informado'}</td>
         <td class="${l.status==='Entrada'?'pos-cell':'neg-cell'}">${l.status}</td>
         <td class="${l.status==='Entrada'?'pos-cell':'neg-cell'}">${fmtR(l.valor)}</td>
         <td>${aprovacaoCel}</td></tr>`;
@@ -1805,11 +7576,15 @@ function importFluxoDiario(evt) {
         if(!dataEfetiva) return;
         const key = toKey(dataEfetiva);
         if(!lancamentosPorDia[key]) lancamentosPorDia[key] = [];
+        const planoContas = colMap['Plano de Contas']!==undefined ? r[colMap['Plano de Contas']] : null;
+        const contaExibicao = (colMap['Observação']!==undefined && r[colMap['Observação']]) || planoContas || '';
         lancamentosPorDia[key].push({
           id: key + '_' + lancamentosPorDia[key].length,
           fornecedor: String(r[colMap['Razão Social']]),
           status: String(r[colMap['Status']]||''),
-          conta: colMap['Conta Contabil']!==undefined ? String(r[colMap['Conta Contabil']]||'') : '',
+          conta: String(contaExibicao),
+          planoContas: planoContas ? String(planoContas) : '',
+          centroCusto: colMap['Centro de Custos']!==undefined && r[colMap['Centro de Custos']] ? String(r[colMap['Centro de Custos']]) : 'Não informado',
           unidade: colMap['Unidade']!==undefined && r[colMap['Unidade']] ? String(r[colMap['Unidade']]) : 'Não informado',
           valor: typeof r[colMap['Valor']]==='number' ? r[colMap['Valor']] : 0,
         });
@@ -2184,7 +7959,7 @@ function initBalancoCharts() {
 }
 
 // ── ORÇAMENTO POR ÁREA PAGE ──
-let areaOrcamentoSelecionada = 'Pedagógico';
+let areaOrcamentoSelecionada = 'Pedagogico';
 
 function mudarAreaOrcamento(area) {
   areaOrcamentoSelecionada = area;
@@ -2331,11 +8106,19 @@ function importOrcamentoAreas(evt) {
   if(!files.length) return;
 
   const mapaArquivos = {
-    'orcamento_pedagogico': 'Pedagógico',
-    'orcamento_administrativo': 'Administrativo',
-    'orcamento_manutencao': 'Manutenção',
-    'orcamento_marketing': 'Marketing/Comercial',
+    'orcamento_financeiro': 'Financeiro',
     'orcamento_rh': 'RH',
+    'orcamento_comercial': 'Comercial',
+    'orcamento_pedagogico': 'Pedagogico',
+    'orcamento_marketing': 'Marketing',
+    'orcamento_compras': 'Compras',
+    'orcamento_enfermaria': 'Enfermaria',
+    'orcamento_manutencao': 'Manutenção',
+    'orcamento_ti': 'TI',
+    'orcamento_portaria': 'Portaria',
+    'orcamento_limpeza': 'Limpeza',
+    'orcamento_papelaria': 'Papelaria',
+    'orcamento_cantina': 'Cantina',
   };
 
   let processados = 0, comErro = [];
@@ -2505,6 +8288,31 @@ function navigate(el, page) {
     if(page==='rentsalas') initRentSalasCharts();
     if(page==='detalhe') initDetalheCharts();
   }, 50);
+}
+
+function toggleSubmenuAreas(event) {
+  const sub = document.getElementById('submenu-areas');
+  const seta = document.getElementById('seta-submenu-areas');
+  const abrindo = sub.style.display === 'none';
+  sub.style.display = abrindo ? 'block' : 'none';
+  seta.style.transform = abrindo ? 'rotate(90deg)' : 'rotate(0deg)';
+}
+
+function navigateArea(el, area) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-orcamentoareas').classList.add('active');
+  const m = PAGE_META['orcamentoareas'];
+  document.getElementById('page-title').textContent = m.title + ' — ' + area;
+  document.getElementById('page-sub').textContent   = m.sub;
+
+  areaOrcamentoSelecionada = area;
+  // mantém o submenu de áreas aberto, já que estamos dentro dele
+  document.getElementById('submenu-areas').style.display = 'block';
+  document.getElementById('seta-submenu-areas').style.transform = 'rotate(90deg)';
+
+  setTimeout(()=> initOrcamentoAreasCharts(), 50);
 }
 
 // ══════════════════════════════════════════════════════════
