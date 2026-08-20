@@ -10213,8 +10213,8 @@ function renderConsolidado() {
     const totalMargem = margem.reduce((a,b)=>a+b,0)/12;
     const totalResultado = resultado.reduce((a,b)=>a+b,0)/12;
 
-    const barLabelsPluginH = {
-      id: 'barLabelsCustomH',
+    const barLabelsPluginV = {
+      id: 'barLabelsCustomV',
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         const meta = chart.getDatasetMeta(0);
@@ -10223,10 +10223,10 @@ function renderConsolidado() {
           ctx.save();
           ctx.font = 'bold 12px Arial';
           ctx.fillStyle = '#1B2A4A';
-          ctx.textAlign = valor >= 0 ? 'left' : 'right';
-          ctx.textBaseline = 'middle';
-          const offsetX = valor >= 0 ? 8 : -8;
-          ctx.fillText(fmtR(valor), bar.x + offsetX, bar.y);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = valor >= 0 ? 'bottom' : 'top';
+          const offsetY = valor >= 0 ? -8 : 8;
+          ctx.fillText(fmtR(valor), bar.x, bar.y + offsetY);
           ctx.restore();
         });
       }
@@ -10238,18 +10238,19 @@ function renderConsolidado() {
         datasets:[
           { data:[totalReceita, totalMargem, totalResultado],
             backgroundColor:['#F5B700','#F5B700', totalResultado>=0?'#6B8E23':'#E74C3C'],
-            borderRadius:4, maxBarThickness:50 },
+            borderRadius:4, maxBarThickness:90 },
         ]
       },
-      plugins: [barLabelsPluginH],
-      options:{responsive:true,maintainAspectRatio:false, indexAxis:'y',
-        layout:{padding:{left:10,right:10}},
+      plugins: [barLabelsPluginV],
+      options:{responsive:true,maintainAspectRatio:false,
+        layout:{padding:{top:30,bottom:30}},
         plugins:{legend:{display:false}},
         scales:{
-          x:{display:false,grid:{display:false},
-             min: Math.min(0,totalReceita,totalMargem,totalResultado) - Math.max(Math.abs(totalReceita),Math.abs(totalMargem),Math.abs(totalResultado))*0.35,
-             max: Math.max(0,totalReceita,totalMargem,totalResultado) + Math.max(Math.abs(totalReceita),Math.abs(totalMargem),Math.abs(totalResultado))*0.35},
-          y:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#333'}}}
+          x:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#333'}},
+          y:{display:false,grid:{display:false},
+             min: Math.min(0,totalReceita,totalMargem,totalResultado) - Math.max(Math.abs(totalReceita),Math.abs(totalMargem),Math.abs(totalResultado))*0.20,
+             max: Math.max(0,totalReceita,totalMargem,totalResultado) + Math.max(Math.abs(totalReceita),Math.abs(totalMargem),Math.abs(totalResultado))*0.20}
+        }
       }
     });
   }
