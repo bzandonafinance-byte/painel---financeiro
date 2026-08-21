@@ -225,6 +225,9 @@
     <div class="nav-item" data-page="analises" onclick="navigate(this,'analises')">
       Análises
     </div>
+    <div class="nav-item" data-page="simulador" onclick="navigate(this,'simulador')">
+      Simulador 2027
+    </div>
   </nav>
 </aside>
 
@@ -280,6 +283,11 @@
     <!-- ══════ PAGE: ANÁLISES ══════ -->
     <div class="page" id="page-analises">
       <div id="conteudo-analises"></div>
+    </div>
+
+    <!-- ══════ PAGE: SIMULADOR 2027 ══════ -->
+    <div class="page" id="page-simulador">
+      <div id="conteudo-simulador"></div>
     </div>
 
   </div>
@@ -10076,6 +10084,72 @@ const DADOS = {
   }
 };
 
+const DADOS_PRECIFICACAO = [
+  {
+    "serie": "Berçário",
+    "turmas": 1,
+    "alunosAtual": 14,
+    "custoTotalAno": 564403.35,
+    "ticketMedioAtual": 2246.64,
+    "pctDesconto": 42.6,
+    "pctImpostos": 6.0
+  },
+  {
+    "serie": "Infantil 1",
+    "turmas": 3,
+    "alunosAtual": 36,
+    "custoTotalAno": 567830.19,
+    "ticketMedioAtual": 1949.09,
+    "pctDesconto": 42.2,
+    "pctImpostos": 6.0
+  },
+  {
+    "serie": "Infantil 2",
+    "turmas": 3,
+    "alunosAtual": 42,
+    "custoTotalAno": 483076.13,
+    "ticketMedioAtual": 1547.22,
+    "pctDesconto": 36.8,
+    "pctImpostos": 6.0
+  },
+  {
+    "serie": "Infantil 3",
+    "turmas": 3,
+    "alunosAtual": 35,
+    "custoTotalAno": 567359.03,
+    "ticketMedioAtual": 2483.96,
+    "pctDesconto": 39.3,
+    "pctImpostos": 6.0
+  },
+  {
+    "serie": "Infantil 4",
+    "turmas": 4,
+    "alunosAtual": 40,
+    "custoTotalAno": 697272.74,
+    "ticketMedioAtual": 2740.39,
+    "pctDesconto": 33.8,
+    "pctImpostos": 6.0
+  },
+  {
+    "serie": "Infantil 5",
+    "turmas": 3,
+    "alunosAtual": 40,
+    "custoTotalAno": 657694.22,
+    "ticketMedioAtual": 2336.85,
+    "pctDesconto": 36.4,
+    "pctImpostos": 6.0
+  },
+  {
+    "serie": "1º Ano",
+    "turmas": 1,
+    "alunosAtual": 12,
+    "custoTotalAno": 196469.24,
+    "ticketMedioAtual": 2867.94,
+    "pctDesconto": 39.8,
+    "pctImpostos": 6.0
+  }
+];
+
 const MESES_NOMES = {};
 let charts = {};
 
@@ -10087,6 +10161,7 @@ const PAGE_META = {
   consolidado: { title:'CONSOLIDADO', sub:'Rentabilidade por sala de aula (Jan/2026, retrato pontual)' },
   porsala: { title:'RENTABILIDADE POR SALA', sub:'Selecione uma sala para ver o detalhamento' },
   analises: { title:'ANÁLISES E PRÓXIMOS PASSOS', sub:'Principais achados para a diretoria' },
+  simulador: { title:'SIMULADOR DE PRECIFICAÇÃO 2027', sub:'Reajuste de mensalidade por série, baseado no custo real por aluno' },
 };
 
 function navigate(el, page) {
@@ -10101,6 +10176,7 @@ function navigate(el, page) {
     if(page==='consolidado') renderConsolidado();
     if(page==='porsala') renderPorSala();
     if(page==='analises') renderAnalises();
+    if(page==='simulador') renderSimulador();
   }, 30);
 }
 
@@ -10365,9 +10441,198 @@ const ANALISES_HTML = `
   </div>
 `;
 
+const SIMULADOR_HTML = `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">SIMULADOR DE PRECIFICAÇÃO 2027</div>
+    <div class="card-sub">
+      Parte do custo real de cada série. Edite qualquer campo azul (alunos, ticket médio, % desconto, % impostos,
+      margem-alvo) e veja os dois caminhos possíveis: quantos alunos a mais cobririam o custo, ou qual ticket médio seria necessário.
+    </div>
+    <div style="overflow-x:auto;margin-top:14px">
+      <table class="data-table" id="tbl-precificacao"></table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">CONSOLIDADO — 2026 x 2027</div>
+    <div class="card-sub">Considerando o caminho "aumento de ticket médio" (mantendo o nº de alunos de hoje) — atualiza sozinho conforme você ajusta a tabela acima</div>
+    <div style="overflow-x:auto;margin-top:14px">
+      <table class="data-table" id="tbl-consolidado-2027"></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">COMO USAR E POR QUE ISSO IMPORTA</div>
+    <div style="font-size:13px;line-height:1.8;margin-top:10px">
+      <p style="font-weight:700;margin-bottom:4px">Como usar</p>
+      <ol style="padding-left:20px;margin-bottom:16px">
+        <li>Cada linha já vem preenchida com o <strong>custo total anual real</strong> daquela série, o nº de alunos de hoje, o ticket médio atual, e as taxas médias de desconto e imposto (calculadas a partir dos dados reais) — mas todos esses campos são editáveis, pra você simular cenários diferentes.</li>
+        <li>Defina uma <strong>margem-alvo</strong> (0% = só cobrir o custo, sem sobra; um valor positivo = quanto de lucro a mais você quer deixar).</li>
+        <li>A coluna <strong>"Falta/(Sobra)"</strong> mostra se, do jeito que está hoje, a série cobre o próprio custo ou não.</li>
+        <li>A coluna <strong>"Alunos Necessários"</strong> responde: mantendo o ticket médio como está, quantos alunos a série precisaria ter pra bater a margem-alvo?</li>
+        <li>A coluna <strong>"Ticket Médio Necessário"</strong> responde a pergunta oposta: mantendo o nº de alunos como está, qual deveria ser o ticket médio pra bater a margem-alvo?</li>
+      </ol>
+      <p style="font-weight:700;margin-bottom:4px">Por que isso importa</p>
+      <p style="margin-bottom:10px">
+        Hoje, o reajuste de mensalidade normalmente é decidido de forma <strong>igual pra escola inteira</strong> (por exemplo,
+        "vamos reajustar 8% em todas as séries"). O problema é que o <strong>custo por aluno varia muito</strong> entre as séries
+        — o Berçário, por exemplo, custa muito mais por aluno que a Infantil 2, porque exige mais professores e auxiliares
+        por criança. Reajustar tudo igual significa que algumas séries continuam no prejuízo (subsidiadas por outras,
+        sem ninguém decidir isso de propósito), enquanto outras cobram mais do que precisariam pra serem sustentáveis.
+      </p>
+      <p style="margin-bottom:10px">
+        Além disso, separar os dois caminhos (mais alunos x ticket maior) ajuda a decidir <strong>qual estratégia faz mais
+        sentido pra cada série</strong> — uma sala com vaga sobrando pode preferir captar mais alunos em vez de subir preço;
+        uma sala já cheia só tem o caminho do ticket médio.
+      </p>
+      <p style="color:var(--muted);font-style:italic">
+        Ponto de atenção: os números partem do retrato atual (Aluguel/Energia ainda em correção provisória, Depreciação
+        ainda não incluída) — fechando essas pendências, os valores de custo ficam mais precisos e a simulação fica
+        ainda mais confiável.
+      </p>
+    </div>
+  </div>
+`;
+
+function fmtR2(v) { return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtR0(v) { return 'R$ '+Math.round(v).toLocaleString('pt-BR'); }
+
+// Pega o valor de um campo (editado pelo usuário, se houver, senão o valor padrão real)
+function valorCampo(s, campo, padrao) {
+  return (s['_'+campo] !== undefined) ? s['_'+campo] : (padrao !== undefined ? padrao : s[campo]);
+}
+
+function calcularCenarios(s) {
+  const alunos = s.alunosAtual;           // travado — não editável
+  const custoTotalAno = s.custoTotalAno; // travado — calculado direto da planilha de rentabilidade
+  const ticketMedio = s.ticketMedioAtual; // travado — calculado direto da planilha de rentabilidade
+  const pctDesconto = valorCampo(s, 'pctDesconto', 0) / 100; // começa em 0% — quem usar define o percentual desejado
+  const pctImpostos = 0.06;               // travado em 6%
+  const margemAlvo = (s._margem !== undefined ? s._margem : 0) / 100;
+
+  const fatorLiquido = 1 - pctDesconto - pctImpostos;
+  const receitaLiquidaAtual = alunos * ticketMedio * 12 * fatorLiquido;
+  const faltaOuSobra = receitaLiquidaAtual - custoTotalAno; // negativo = falta
+
+  const custoComMargem = margemAlvo < 1 ? custoTotalAno / (1 - margemAlvo) : NaN;
+  const alunosNecessarios = (fatorLiquido > 0 && ticketMedio > 0) ? custoComMargem / (ticketMedio * 12 * fatorLiquido) : NaN;
+  const ticketNecessario = (fatorLiquido > 0 && alunos > 0) ? custoComMargem / (alunos * 12 * fatorLiquido) : NaN;
+
+  return { alunos, custoTotalAno, ticketMedio, pctDesconto, pctImpostos, margemAlvo,
+           receitaLiquidaAtual, faltaOuSobra, alunosNecessarios, ticketNecessario };
+}
+
+function campoEditavel(indice, campo, valor, largura, decimais, prefixoRS) {
+  const casas = decimais !== undefined ? decimais : 0;
+  const prefixo = prefixoRS ? `<span style="color:var(--muted);font-size:12px;margin-right:2px">R$</span>` : '';
+  return `<span style="display:inline-flex;align-items:center;justify-content:flex-end">${prefixo}<input type="number" value="${valor.toFixed(casas)}" step="any"
+    style="width:${largura}px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;text-align:right"
+    oninput="atualizarCampo(${indice}, '${campo}', this.value)"></span>`;
+}
+
+function renderTabelaPrecificacao() {
+  const t = document.getElementById('tbl-precificacao');
+  if(!t) return;
+  t.innerHTML = `<thead><tr>
+      <th>Série</th>
+      <th style="text-align:right">Alunos Atual</th>
+      <th style="text-align:right">Custo Total/Ano</th>
+      <th style="text-align:right">Ticket Médio Atual</th>
+      <th style="text-align:right">% Desconto</th>
+      <th style="text-align:right">% Impostos</th>
+      <th style="text-align:right">Margem-Alvo</th>
+      <th style="text-align:right">Receita Líquida Atual</th>
+      <th style="text-align:right">Falta/(Sobra)</th>
+      <th style="text-align:right">Alunos Necessários</th>
+      <th style="text-align:right">Ticket Médio Necessário</th>
+    </tr></thead>
+    <tbody>${DADOS_PRECIFICACAO.map((s,i)=>{
+      const c = calcularCenarios(s);
+      const corFalta = c.faltaOuSobra >= 0 ? 'pos-cell' : 'neg-cell';
+      return `<tr>
+        <td style="font-weight:700">${s.serie}</td>
+        <td style="text-align:right;font-weight:600">${c.alunos}</td>
+        <td style="text-align:right;font-weight:600">${fmtR2(c.custoTotalAno)}</td>
+        <td style="text-align:right;font-weight:600">${fmtR2(c.ticketMedio)}</td>
+        <td style="text-align:right">${campoEditavel(i,'pctDesconto',c.pctDesconto*100,55,1)}%</td>
+        <td style="text-align:right;font-weight:600">6%</td>
+        <td style="text-align:right">${campoEditavel(i,'margem',c.margemAlvo*100,55,0)}%</td>
+        <td style="text-align:right">${fmtR0(c.receitaLiquidaAtual)}</td>
+        <td style="text-align:right;font-weight:700" class="${corFalta}">${fmtR0(c.faltaOuSobra)}</td>
+        <td style="text-align:right;font-weight:700">${isNaN(c.alunosNecessarios) ? '—' : Math.ceil(c.alunosNecessarios)}</td>
+        <td style="text-align:right;font-weight:700">${isNaN(c.ticketNecessario) ? '—' : fmtR2(c.ticketNecessario)}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+function atualizarCampo(indice, campo, valor) {
+  const num = parseFloat(valor);
+  if(campo === 'margem') {
+    DADOS_PRECIFICACAO[indice]._margem = isNaN(num) ? 0 : num;
+  } else {
+    DADOS_PRECIFICACAO[indice]['_'+campo] = isNaN(num) ? 0 : num;
+  }
+  renderTabelaPrecificacao();
+  renderTabelaConsolidado2027();
+}
+
+function renderTabelaConsolidado2027() {
+  const t = document.getElementById('tbl-consolidado-2027');
+  if(!t) return;
+
+  let receita2026=0, custos2026=0, resultado2026=0;
+  let receita2027=0, custos2027=0, resultado2027=0;
+
+  DADOS_PRECIFICACAO.forEach(s => {
+    const c = calcularCenarios(s);
+    // 2026: situação atual (receita líquida real vs custo real)
+    receita2026 += c.receitaLiquidaAtual;
+    custos2026 += c.custoTotalAno;
+    resultado2026 += c.faltaOuSobra;
+
+    // 2027: aplica o TICKET MÉDIO NECESSÁRIO (mantendo o nº de alunos de hoje), custo inalterado
+    const ticketNovo = isNaN(c.ticketNecessario) ? c.ticketMedio : c.ticketNecessario;
+    const receitaLiquida2027 = c.alunos * ticketNovo * 12 * (1 - c.pctDesconto - c.pctImpostos);
+    receita2027 += receitaLiquida2027;
+    custos2027 += c.custoTotalAno; // custo não muda, só o preço
+    resultado2027 += (receitaLiquida2027 - c.custoTotalAno);
+  });
+
+  const linhas = [
+    { label:'Receita Líquida', v26:receita2026, v27:receita2027 },
+    { label:'Custos (Diretos e Indiretos)', v26:custos2026, v27:custos2027 },
+    { label:'Resultado', v26:resultado2026, v27:resultado2027 },
+  ];
+
+  t.innerHTML = `<thead><tr>
+      <th></th><th style="text-align:right">2026</th><th style="text-align:right">2027</th>
+      <th style="text-align:right">B/(W)</th><th style="text-align:right">% B/(W)</th>
+    </tr></thead>
+    <tbody>${linhas.map(l=>{
+      const ehCusto = l.label.startsWith('Custos');
+      const diff = l.v27 - l.v26;
+      const diffAjustado = ehCusto ? -diff : diff;
+      const pct = l.v26 ? (diff/Math.abs(l.v26)*100) : 0;
+      const cor = diffAjustado >= 0 ? 'pos-cell' : 'neg-cell';
+      const sinal = diff >= 0 ? '+' : '';
+      return `<tr>
+        <td style="font-weight:700">${l.label}</td>
+        <td style="text-align:right">${fmtR0(l.v26)}</td>
+        <td style="text-align:right;font-weight:700">${fmtR0(l.v27)}</td>
+        <td style="text-align:right;font-weight:700" class="${cor}">${sinal}${fmtR0(diff)}</td>
+        <td style="text-align:right;font-weight:700" class="${cor}">${sinal}${pct.toFixed(1)}%</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
 function renderAnalises() {
-  // preenchido em bloco separado (ver ANALISES_HTML)
   document.getElementById('conteudo-analises').innerHTML = ANALISES_HTML;
+}
+
+function renderSimulador() {
+  document.getElementById('conteudo-simulador').innerHTML = SIMULADOR_HTML;
+  renderTabelaPrecificacao();
+  renderTabelaConsolidado2027();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
